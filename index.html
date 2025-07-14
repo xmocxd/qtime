@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Time Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    #taskForm {
+      display: flex;
+      margin-bottom: 1em;
+    }
+    #taskForm input {
+      flex: 1;
+      padding: 0.5em;
+    }
+    #taskForm button {
+      padding: 0.5em;
+    }
+    .task {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 1em;
+      margin-bottom: 1em;
+      border-radius: 5px;
+    }
+    .task.active {
+      background: #e0ffe0;
+    }
+    .task button {
+      margin-right: 0.5em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Time Tracker</h1>
+
+  <form id="taskForm">
+    <input type="text" id="taskName" placeholder="New Task Name" required />
+    <button type="submit">Add Task</button>
+  </form>
+
+  <div id="taskList"></div>
+
+  <script>
+    let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+
+    const taskList = document.getElementById("taskList");
+    const taskForm = document.getElementById("taskForm");
+    const taskNameInput = document.getElementById("taskName");
+
+    function saveTasks() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function formatTime(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+      return `${hrs}h ${mins}m ${secs}s`;
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = "";
+      tasks.forEach((task, index) => {
+        const div = document.createElement("div");
+        div.className = "task" + (task.isRunning ? " active" : "");
+        div.innerHTML = `
+          <strong>${task.name}</strong><br/>
+          Time Tracked: <span id="time-${index}">${formatTime(task.time || 0)}</span><br/>
+          <button onclick="toggleTask(${index})">
+            ${task.isRunning ? "Punch Out" : "Punch In"}
+          </button>
+          <button onclick="deleteTask(${index})">Delete</button>
+        `;
+        taskList.appendChild(div);
+      });
+    }
+
+    function toggleTask(index) {
+      const task = tasks[index];
+      const now = Date.now();
+
+      if (task.isRunning) {
+        const elapsed = now - task.startTime;
+        task.time = (task.time || 0) + elapsed;
+        task.isRunning = false;
+        delete task.startTime;
+      } else {
+        task.startTime = now;
+        task.isRunning = true;
+      }
+
+      saveTasks();
+      renderTasks();
+    }
+
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      saveTasks();
+      renderTasks();
+    }
+
+    taskForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = taskNameInput.value.trim();
+      if (!name) return;
+
+      tasks.push({ name, time: 0, isRunning: false });
+      saveTasks();
+      renderTasks();
+      taskNameInput.value = "";
+    });
+
+    // Update running time every second
+    setInterval(() => {
+      tasks.forEach((task, i) => {
+        if (task.isRunning) {
+          const elapsed = Date.now() - task.startTime;
+          document.getElementById(`time-${i}`).textContent = formatTime((task.time || 0) + elapsed);
+        }
+      });
+    }, 1000);
+
+    renderTasks();
+  </script>
+</body>
+</html>
