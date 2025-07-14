@@ -1,0 +1,61 @@
+ body {
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    margin: 2em;
+    background: #111111;
+    color: #DDD;
+}
+h1 {
+    text-align: center;
+}
+#taskForm {
+    display: flex;
+    margin-bottom: 1em;
+}
+#taskForm input {
+    flex: 1;
+    padding: 0.5em;
+}
+#taskForm button {
+    padding: 0.5em;
+}
+.task {
+    position: relative;
+    background: #222;
+    border: 1px solid #333;
+    padding: 1em;
+    margin-bottom: 1em;
+    border-radius: 5px;
+}
+.task.active {
+    background: #444;
+}
+.task button {
+    margin-right: 0.5em;
+}
+
+input {
+    background: #222;
+    color: #ddd;
+}
+
+button {
+    background: #222;
+    color: #ddd;
+}
+
+.task-buttons {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0.5em;
+}
+
+.task-name {
+    font-weight: bold;
+    padding-right: 20px;
+}
+
+.task-time {
+    font-style: italic;
+}
